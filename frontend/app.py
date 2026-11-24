@@ -5,6 +5,7 @@ Refined UI/UX following the Xebia Enterprise Design System.
 """
 
 from __future__ import annotations
+import asyncio
 import os
 import sys
 
@@ -1549,10 +1550,17 @@ if data:
         with exp_c1:
             try:
                 res_export = export_excel_report(data)
-                excel_bytes = (
-                    res_export.body_iterator.getbuffer()
-                    if hasattr(res_export.body_iterator, "getbuffer")
-                    else b"".join([chunk for chunk in res_export.body_iterator])
+
+                async def read_response_body(body_iterator):
+                    chunks = []
+
+                    async for chunk in body_iterator:
+                        chunks.append(chunk)
+
+                    return b"".join(chunks)
+
+                excel_bytes = asyncio.run(
+                    read_response_body(res_export.body_iterator)
                 )
                 st.download_button(
                     label="📊 Download Formatted Excel Report (.xlsx)",
