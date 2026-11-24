@@ -1395,7 +1395,7 @@ if data:
                     has_fix = bool(iss.get("suggested_fix"))
 
                     if has_code or has_fix:
-                        code_col1, code_col2 = st.columns(2 if (has_code and has_fix) else 1, gap="small")
+                        code_col1, code_col2 = st.columns(2, gap="small")
                         if has_code:
                             with code_col1:
                                 st.markdown('<div class="issue-field-label">Identified Code / Expression:</div>', unsafe_allow_html=True)
