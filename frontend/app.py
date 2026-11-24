@@ -1559,7 +1559,7 @@ if data:
                     data=excel_bytes,
                     file_name=f"Xebia_Diagnostic_{data['report_name']}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True,
+                    width="stretch",
                 )
             except Exception as e:
                 st.error(f"Excel export error: {e}")
@@ -1570,5 +1570,5 @@ if data:
                 data=json.dumps(data, indent=2),
                 file_name=f"Xebia_Diagnostic_{data['report_name']}.json",
                 mime="application/json",
-                use_container_width=True,
+                width="stretch",
             )
