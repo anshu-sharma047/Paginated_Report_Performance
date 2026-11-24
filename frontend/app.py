@@ -1110,7 +1110,7 @@ with c_toggle:
     st.caption("Simple conversions never call the API · Fully private local analysis")
 
 with c_btn:
-    analyze_clicked = st.button("✦ Analyze Report →", type="primary", use_container_width=True)
+    analyze_clicked = st.button("✦ Analyze Report →", type="primary", width="stretch")
 
     if analyze_clicked:
         xml_content = None
@@ -1502,7 +1502,7 @@ if data:
                     "Payload Risk": risk,
                     "Safe to Prune": ", ".join(info.get("unused_fields", [])) if info.get("unused_fields") else "None (Fully utilized)",
                 })
-            st.dataframe(pd.DataFrame(matrix_data), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame(matrix_data), width="stretch", hide_index=True)
             st.caption("💡 **Recommendation**: Pruning safe columns removes network serialization latency without altering report layout or numbers.")
 
     # -------------------------------------------------------------
@@ -1538,7 +1538,7 @@ if data:
             data=html_content.encode("utf-8"),
             file_name=f"Paginated_Report_Performance_Analysis_{rpt_id}.html",
             mime="text/html",
-            use_container_width=True,
+            width="stretch",
             type="primary",
             help="Download the self-contained HTML report for client stakeholders and developers.",
         )
