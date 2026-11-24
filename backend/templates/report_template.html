@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xebia Performance Assessment - {{ report_name | e }} ({{ report_id | e }})</title>
+    <style>
+        /* ==========================================================================
+           Xebia Enterprise Design System - Standalone Technical Report Theme
+           100% Self-Contained: No external CDNs or network requests.
+           ========================================================================== */
+        :root {
+            --xebia-purple: #682A5B;
+            --xebia-purple-dark: #532049;
+            --xebia-purple-light: #8E3B7D;
+            --xebia-purple-tint: #FAF5F9;
+            --xebia-purple-border: #EBD8E7;
+            
+            --dark-900: #111827;
+            --dark-800: #1F2937;
+            --dark-700: #374151;
+            --gray-600: #4B5563;
+            --gray-500: #6B7280;
+            --gray-400: #9CA3AF;
+            --gray-200: #E5E7EB;
+            --gray-100: #F3F4F6;
+            --gray-50:  #F9FAFB;
+            --white:    #FFFFFF;
+
+            /* Severity Design Tokens */
+            --sev-critical-text:   #991B1B;
+            --sev-critical-bg:     #FEE2E2;
+            --sev-critical-border: #FCA5A5;
+
+            --sev-high-text:       #C2410C;
+            --sev-high-bg:         #FFEDD5;
+            --sev-high-border:     #FDBA74;
+
+            --sev-med-text:        #B45309;
+            --sev-med-bg:          #FEF3C7;
+            --sev-med-border:      #FDE68A;
+
+            --sev-low-text:        #1D4ED8;
+            --sev-low-bg:          #DBEAFE;
+            --sev-low-border:      #93C5FD;
+
+            --sev-info-text:       #374151;
+            --sev-info-bg:         #F3F4F6;
+            --sev-info-border:     #D1D5DB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--dark-800);
+            background-color: var(--gray-50);
+            line-height: 1.55;
+            font-size: 13.5px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Container & Page Layout */
+        .report-wrapper {
+            max-width: 1440px;
+            width: 96%;
+            margin: 0 auto;
+            padding: 24px 20px 60px 20px;
+        }
+
+        /* Sticky Action / Nav Bar */
+        .report-top-bar {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+        .report-nav-links {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .report-nav-link {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 600;
+            transition: color 0.15s ease;
+        }
+        .report-nav-link:hover {
+            color: var(--xebia-purple);
+        }
+        .btn-print {
+            background-color: var(--xebia-purple);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-print:hover {
+            background-color: var(--xebia-purple-dark);
+        }
+
+        /* Header Card */
+        .report-header-card {
+            background: var(--white);
+            border: 1px solid var(--xebia-purple-border);
+            border-top: 4px solid var(--xebia-purple);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(104, 42, 91, 0.04);
+        }
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-logo-img {
+            height: 32px;
+            width: auto;
+            display: block;
+        }
+        .header-wordmark {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--xebia-purple);
+            letter-spacing: -0.5px;
+        }
+        .header-divider-slash {
+            color: var(--gray-400);
+            font-size: 22px;
+            font-weight: 300;
+        }
+        .header-app-badge {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-600);
+            background: var(--gray-100);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .report-main-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--dark-900);
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+        .report-main-subtitle {
+            font-size: 13.5px;
+            color: var(--gray-500);
+            margin-bottom: 16px;
+        }
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            background: var(--gray-50);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+        }
+        .meta-item {
+            font-size: 12px;
+        }
+        .meta-label {
+            color: var(--gray-500);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .meta-value {
+            font-weight: 600;
+            color: var(--dark-900);
+            font-family: ui-monospace, monospace;
+        }
+
+        /* Section Cards */
+        .report-section {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .section-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid var(--gray-200);
+            padding-bottom: 12px;
+        }
+        .section-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-num-pill {
+            background: var(--xebia-purple-tint);
+            color: var(--xebia-purple);
+            font-weight: 800;
+            font-size: 12px;
+            padding: 3px 9px;
+            border-radius: 6px;
+            border: 1px solid var(--xebia-purple-border);
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--dark-900);
+        }
+        .section-desc {
+            font-size: 12.5px;
+            color: var(--gray-600);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        /* Standard Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            line-height: 1.4;
+        }
+        .badge-critical {
+            background-color: var(--sev-critical-bg);
+            color: var(--sev-critical-text);
+            border: 1px solid var(--sev-critical-border);
+        }
+        .badge-high {
+            background-color: var(--sev-high-bg);
+            color: var(--sev-high-text);
+            border: 1px solid var(--sev-high-border);
+        }
+        .badge-medium {
+            background-color: var(--sev-med-bg);
+            color: var(--sev-med-text);
+            border: 1px solid var(--sev-med-border);
+        }
+        .badge-low {
+            background-color: var(--sev-low-bg);
+            color: var(--sev-low-text);
+            border: 1px solid var(--sev-low-border);
+        }
+        .badge-info {
+            background-color: var(--sev-info-bg);
+            color: var(--sev-info-text);
+            border: 1px solid var(--sev-info-border);
+        }
+        .pill-classification {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 10.5px;
+            font-weight: 600;
+            border: 1px solid var(--gray-200);
+            display: inline-block;
+        }
+
+        /* Professional Tables */
+        .data-table-container {
+            width: 100%;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            margin-bottom: 16px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            background: var(--white);
+        }
+        .data-table-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+            width: 0;
+            height: 0;
+        }
+        table.data-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+            background: var(--white);
+        }
+        table.data-table th {
+            background-color: var(--gray-100);
+            color: var(--dark-900);
+            font-weight: 700;
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--gray-200);
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.3px;
+            white-space: normal;
+            word-break: normal;
+            vertical-align: bottom;
+            line-height: 1.3;
+        }
+        table.data-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--dark-800);
+            vertical-align: top;
+            font-size: 11.5px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        table.data-table tr:last-child td {
+            border-bottom: none;
+        }
+        table.data-table tr:hover {
+            background-color: var(--gray-50);
+        }
+
+        /* SQL Comparison Panels */
+        .sql-dataset-box {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: var(--white);
+            overflow: hidden;
+        }
+        .sql-box-header {
+            padding: 10px 16px;
+            background: var(--gray-100);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .sql-box-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--dark-900);
+        }
+        .sql-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        @media (max-width: 900px) {
+            .sql-comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .sql-pane {
+            padding: 12px 16px;
+            overflow-x: auto;
+        }
+        .sql-pane:first-child {
+            border-right: 1px solid var(--gray-200);
+            background: #FCFCFD;
+        }
+        .sql-pane:last-child {
+            background: #FDFEFE;
+        }
+        .sql-pane-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .code-container {
+            background: #1E1E24;
+            color: #D4D4D8;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 11.5px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            word-break: break-all;
+            position: relative;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .code-container.suggested {
+            background: #0F172A;
+            border-left: 3px solid #10B981;
+        }
+        .code-container.candidate {
+            background: #1C1917;
+            border-left: 3px solid #F59E0B;
+        }
+        .btn-copy {
+            background: rgba(255,255,255,0.12);
+            color: #FFFFFF;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 10.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-copy:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .sql-explanation-pane {
+            padding: 12px 16px;
+            background: var(--white);
+            font-size: 12px;
+        }
+        .sql-explanation-pane ul {
+            margin: 6px 0 0 16px;
+        }
+        .sql-explanation-pane li {
+            margin-bottom: 3px;
+        }
+
+        /* Action Plan Form Controls (Interactive with localStorage) */
+        .plan-input-owner {
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 11.5px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .plan-select-status {
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            padding: 4px 4px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .plan-select-status.status-not-started { background: #F3F4F6; color: #4B5563; }
+        .plan-select-status.status-in-progress { background: #FEF3C7; color: #B45309; }
+        .plan-select-status.status-resolved    { background: #DCFCE7; color: #166534; }
+        .plan-select-status.status-validated   { background: #E0E7FF; color: #3730A3; }
+        .plan-select-status.status-deferred    { background: #FEE2E2; color: #991B1B; }
+
+        .plan-input-notes {
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 11.5px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .plan-persistence-bar {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--gray-600);
+            margin-top: 10px;
+        }
+        .btn-reset-plan {
+            background: transparent;
+            border: 1px solid var(--gray-400);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            color: var(--gray-700);
+        }
+        .btn-reset-plan:hover {
+            background: var(--gray-200);
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #111827;
+            color: #FFFFFF;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 500;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Print & PDF Export Engine */
+        @page {
+            size: landscape;
+            margin: 8mm 10mm;
+        }
+
+        @media print {
+            html, body {
+                width: 100% !important;
+                background: #FFFFFF !important;
+                color: #111827 !important;
+                font-size: 8pt !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .report-wrapper {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .report-top-bar, .btn-print, .btn-copy, .btn-reset-plan, #toast, .plan-persistence-bar {
+                display: none !important;
+            }
+            .report-section {
+                border: 1px solid #D1D5DB !important;
+                border-radius: 6px !important;
+                padding: 10px 12px !important;
+                margin-bottom: 12px !important;
+                box-shadow: none !important;
+                page-break-inside: auto !important;
+            }
+            .report-header-card {
+                border: 1px solid #D1D5DB !important;
+                border-top: 4px solid #682A5B !important;
+                border-radius: 6px !important;
+                padding: 12px 16px !important;
+                margin-bottom: 12px !important;
+                box-shadow: none !important;
+                page-break-inside: avoid !important;
+            }
+            .data-table-container {
+                overflow: visible !important;
+                overflow-x: visible !important;
+                border: 1px solid #D1D5DB !important;
+                border-radius: 4px !important;
+                display: block !important;
+                width: 100% !important;
+                margin-bottom: 10px !important;
+                box-shadow: none !important;
+            }
+            table.data-table {
+                width: 100% !important;
+                table-layout: fixed !important;
+                font-size: 7.5pt !important;
+                border-collapse: collapse !important;
+                page-break-inside: auto !important;
+            }
+            table.data-table thead {
+                display: table-header-group !important;
+            }
+            table.data-table tr {
+                page-break-inside: avoid !important;
+            }
+            table.data-table th {
+                background-color: #F3F4F6 !important;
+                color: #111827 !important;
+                font-size: 7pt !important;
+                padding: 5px 6px !important;
+                border-bottom: 1px solid #D1D5DB !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            table.data-table td {
+                padding: 5px 6px !important;
+                font-size: 7.5pt !important;
+                border-bottom: 1px solid #E5E7EB !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+            }
+            .plan-input-owner, .plan-input-notes {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                font-size: 7.5pt !important;
+                width: 100% !important;
+                color: #111827 !important;
+            }
+            .plan-select-status {
+                border: none !important;
+                background: transparent !important;
+                appearance: none !important;
+                -webkit-appearance: none !important;
+                padding: 1px 4px !important;
+                font-size: 7.5pt !important;
+                color: #111827 !important;
+            }
+            .sql-dataset-box {
+                page-break-inside: avoid !important;
+                margin-bottom: 12px !important;
+            }
+            .sql-pane {
+                overflow: visible !important;
+                overflow-x: visible !important;
+                padding: 8px 10px !important;
+            }
+            .code-container {
+                max-height: none !important;
+                overflow: visible !important;
+                font-size: 7pt !important;
+                line-height: 1.35 !important;
+                white-space: pre-wrap !important;
+                word-break: break-all !important;
+                background: #F9FAFB !important;
+                color: #111827 !important;
+                border: 1px solid #D1D5DB !important;
+            }
+            .badge, .pill-classification {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="report-wrapper">
+
+    <!-- Top Navigation & Sticky Toolbar -->
+    <div class="report-top-bar">
+        <div class="report-nav-links">
+            <a href="#section-findings" class="report-nav-link">1. Detailed Findings</a>
+            {% if total_sql_queries > 0 and dataset_optimizations %}
+            <a href="#section-sql" class="report-nav-link">2. SQL Comparison</a>
+            <a href="#section-datasets" class="report-nav-link">3. Dataset Analysis</a>
+            <a href="#section-parameters" class="report-nav-link">4. Parameter Analysis</a>
+            <a href="#section-action-plan" class="report-nav-link">5. Optimization Tracker</a>
+            {% else %}
+            <a href="#section-datasets" class="report-nav-link">2. Dataset Analysis</a>
+            <a href="#section-parameters" class="report-nav-link">3. Parameter Analysis</a>
+            <a href="#section-action-plan" class="report-nav-link">4. Optimization Tracker</a>
+            {% endif %}
+        </div>
+        <button class="btn-print" onclick="window.print()">
+            <span>🖨️</span> Print / Export to PDF
+        </button>
+    </div>
+
+    <!-- Report Header Card -->
+    <div class="report-header-card" id="section-header">
+        <div class="header-top-row">
+            <div class="logo-group">
+                {% if logo_b64 %}
+                <img src="data:image/png;base64,{{ logo_b64 }}" alt="Xebia" class="header-logo-img">
+                {% else %}
+                <span class="header-wordmark">Xebia</span>
+                {% endif %}
+                <span class="header-divider-slash">/</span>
+                <span class="header-app-badge">Performance Analyzer</span>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge {% if health_score >= 80 %}badge-low{% elif health_score >= 60 %}badge-medium{% else %}badge-critical{% endif %}">
+                    Static Architecture Health Score: {{ health_score }}/100 ({{ health_status | e }})
+                </span>
+            </div>
+        </div>
+
+        <h1 class="report-main-title">Paginated Report Performance Analysis</h1>
+        <p class="report-main-subtitle">Technical Assessment, Bottleneck Identification &amp; Query Optimization Blueprint</p>
+
+        <div style="margin-top: 10px; margin-bottom: 16px; font-size: 11.5px; color: var(--gray-600); background: #FAF5F9; border-left: 3px solid var(--xebia-purple); padding: 8px 12px; border-radius: 4px;">
+            ℹ️ <strong>Static Architecture Health Score:</strong> Deterministically evaluated against RDL AST structure and Power BI architectural best practices. Deductions reflect static architecture risks and do not guarantee live runtime query performance or network latency.
+        </div>
+
+        <div class="metadata-grid">
+            <div class="meta-item">
+                <div class="meta-label">Report ID</div>
+                <div class="meta-value">{{ report_id | e }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Source RDL Filename</div>
+                <div class="meta-value">{{ report_name | e }}.rdl</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Analysis Timestamp</div>
+                <div class="meta-value">{{ generation_time | e }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Analyzer Engine</div>
+                <div class="meta-value">{{ analyzer_version | e }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Detailed Findings (Short) -->
+    <div class="report-section" id="section-findings">
+        <div class="section-header-row">
+            <div class="section-title-group">
+                <span class="section-num-pill">01</span>
+                <h2 class="section-title">Detailed Findings (Short)</h2>
+            </div>
+            <span class="pill-classification">{{ issues | length }} Findings Classified</span>
+        </div>
+        <p class="section-desc">
+            All diagnostic findings classified across SQL retrieval, parameter pushdown, report layout hierarchy, and expression complexity.
+        </p>
+
+        <!-- Concise Table Format -->
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 9%;">Finding ID</th>
+                        <th style="width: 7%; text-align: center;">Severity</th>
+                        <th style="width: 9%;">Category</th>
+                        <th style="width: 10%;">Target Object</th>
+                        <th style="width: 23%;">Title &amp; Description</th>
+                        <th style="width: 9%; text-align: center;">Classification</th>
+                        <th style="width: 13%;">Engine Impact</th>
+                        <th style="width: 12%;">Remediation</th>
+                        <th style="width: 8%; text-align: center;">Validation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for iss in issues %}
+                    <tr>
+                        <td style="font-family: ui-monospace, monospace; font-weight: 600; font-size: 11px; word-break: break-all;">{{ iss.id | e }}</td>
+                        <td style="text-align: center;">
+                            {% set sev = iss.severity | lower %}
+                            <span class="badge {% if sev == 'critical' %}badge-critical{% elif sev == 'high' %}badge-high{% elif sev == 'medium' %}badge-medium{% elif sev == 'low' %}badge-low{% else %}badge-info{% endif %}">
+                                {{ iss.severity | upper }}
+                            </span>
+                        </td>
+                        <td>{{ iss.category | e }}</td>
+                        <td><strong style="word-break: break-all;">{{ iss.target_object | e }}</strong></td>
+                        <td>
+                            <div style="font-weight: 700; color: var(--dark-900); margin-bottom: 3px;">{{ iss.title | e }}</div>
+                            <div style="font-size: 11px; color: var(--gray-600); line-height: 1.4;">{{ iss.description | e }}</div>
+                        </td>
+                        <td style="text-align: center;"><span class="pill-classification">{{ iss.classification | e }}</span></td>
+                        <td style="font-size: 11px; color: var(--sev-critical-text);">{{ iss.impact | e }}</td>
+                        <td style="font-size: 11px; color: #065F46; font-weight: 500;">
+                            {{ iss.remediation | e }}
+                            {% if iss.suggested_fix %}
+                            <div style="margin-top: 4px; font-family: ui-monospace, monospace; font-size: 10px; background: #ECFDF5; padding: 4px 6px; border-radius: 4px; border: 1px solid #A7F3D0; color: #065F46; word-break: break-all;">
+                                Suggested: {{ iss.suggested_fix | e }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            {% set vstat = iss.validation_status | default('Validated against RDL metadata') %}
+                            <span class="badge {% if 'manual' in (vstat | lower) %}badge-medium{% elif 'partially' in (vstat | lower) %}badge-medium{% elif 'invalid' in (vstat | lower) %}badge-critical{% else %}badge-low{% endif %}" style="font-size: 9.5px; white-space: normal; line-height: 1.2; display: inline-block;">
+                                {{ vstat | e }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. SQL Comparison (Rendered ONLY when actual SQL datasets exist) -->
+    {% if total_sql_queries > 0 and dataset_optimizations %}
+    <div class="report-section" id="section-sql">
+        <div class="section-header-row">
+            <div class="section-title-group">
+                <span class="section-num-pill">02</span>
+                <h2 class="section-title">SQL Comparison</h2>
+            </div>
+            <span class="badge badge-info">Side-by-Side Diff</span>
+        </div>
+        <p class="section-desc">
+            Exact side-by-side comparison between the original query extracted from the RDL definition and the recommended optimized query.
+            <strong>Important:</strong> Suggested queries are recommendations based on AST and metadata; always validate in your database before deploying.
+        </p>
+
+        {% for ds_name, opt in dataset_optimizations.items() %}
+        <div class="sql-dataset-box">
+            <div class="sql-box-header">
+                <div>
+                    <span class="sql-box-title">Dataset: {{ ds_name | e }}</span>
+                    <span style="font-size: 12px; color: var(--gray-500); margin-left: 8px;">(Original Length: {{ opt.original_query | length }} chars)</span>
+                </div>
+                <div>
+                    {% if opt.fields_pruned %}
+                    <span class="badge badge-high">{{ opt.fields_pruned | length }} Unused Columns Pruned</span>
+                    {% else %}
+                    <span class="badge badge-low">All Columns Used</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="sql-comparison-grid">
+                <div class="sql-pane">
+                    <div class="sql-pane-title">
+                        <span style="color: #991B1B;">🔴 Original SQL Query</span>
+                        <button class="btn-copy" onclick="copyText('orig-sql-{{ loop.index }}')">Copy SQL</button>
+                    </div>
+                    <div class="code-container" id="orig-sql-{{ loop.index }}">{{ opt.original_query | e }}</div>
+                    {% if opt.detected_issues %}
+                    <div style="margin-top: 10px; padding: 8px 12px; background: #FEF2F2; border-left: 3px solid #EF4444; border-radius: 4px;">
+                        <div style="font-size: 11px; font-weight: 700; color: #991B1B; text-transform: uppercase; margin-bottom: 4px;">⚠️ Detected SQL Issues:</div>
+                        <ul style="margin: 0 0 0 16px; padding: 0; font-size: 12px; color: #7F1D1D; line-height: 1.4;">
+                            {% for issue in opt.detected_issues %}
+                            <li>{{ issue | e }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="sql-pane">
+                    <div class="sql-pane-title">
+                        {% if 'manual' in (opt.validation_status | lower) or 'partially' in (opt.validation_status | lower) %}
+                        <span style="color: #B45309;">🟡 Candidate SARGable Query (Requires Index Validation)</span>
+                        {% else %}
+                        <span style="color: #047857;">🟢 Recommended Optimized SQL Query</span>
+                        {% endif %}
+                        <button class="btn-copy" onclick="copyText('sugg-sql-{{ loop.index }}')">Copy SQL</button>
+                    </div>
+                    <div class="code-container {% if 'manual' in (opt.validation_status | lower) %}candidate{% else %}suggested{% endif %}" id="sugg-sql-{{ loop.index }}">{{ opt.suggested_query | e }}</div>
+                    {% if 'manual' in (opt.validation_status | lower) %}
+                    <div style="margin-top: 8px; padding: 8px 12px; background: #FFFBEB; border-left: 3px solid #F59E0B; border-radius: 4px; font-size: 11.5px; color: #92400E; line-height: 1.4;">
+                        ⚠️ <strong>Candidate Query Notice:</strong> Optimization relies on index seek capabilities. Verify that supporting indexes exist in the database and inspect the query execution plan in SQL Server Management Studio before deploying.
+                    </div>
+                    {% endif %}
+                    {% if opt.suggested_improvements %}
+                    <div style="margin-top: 10px; padding: 8px 12px; background: #ECFDF5; border-left: 3px solid #10B981; border-radius: 4px;">
+                        <div style="font-size: 11px; font-weight: 700; color: #065F46; text-transform: uppercase; margin-bottom: 4px;">💡 Suggested Improvements:</div>
+                        <ul style="margin: 0 0 0 16px; padding: 0; font-size: 12px; color: #047857; line-height: 1.4;">
+                            {% for imp in opt.suggested_improvements %}
+                            <li>{{ imp | e }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="sql-explanation-pane">
+                <div style="font-weight: 700; color: var(--dark-900); margin-bottom: 6px;">Optimization Explanation:</div>
+                <ul>
+                    {% for r in opt.optimization_reasons %}
+                    <li><strong>Optimization:</strong> {{ r | e }}</li>
+                    {% endfor %}
+                    {% if opt.fields_pruned %}
+                    <li><strong>Pruned Columns:</strong> {{ opt.fields_pruned | join(', ') | e }} (reduces network payload across Gateway)</li>
+                    {% endif %}
+                    <li><strong>Validation Requirement:</strong> Verify that no downstream Tablix group or subreport dynamically binds to pruned columns.</li>
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 3. Dataset Analysis -->
+    <div class="report-section" id="section-datasets">
+        <div class="section-header-row">
+            <div class="section-title-group">
+                <span class="section-num-pill">{% if total_sql_queries > 0 and dataset_optimizations %}03{% else %}02{% endif %}</span>
+                <h2 class="section-title">Dataset Analysis</h2>
+            </div>
+            <span class="pill-classification">{{ dataset_inventory | length }} Datasets Audited</span>
+        </div>
+        <p class="section-desc">
+            Technical inventory of all datasets defined in the report. Note: Multiple visual references do <em>not</em> imply multiple query executions, unless nested in subreports inside repeating Tablix groups.
+        </p>
+
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 16%;">Dataset Name</th>
+                        <th style="width: 6%; text-align: center;">Type</th>
+                        <th style="width: 11%; text-align: center;">Dependency</th>
+                        <th style="width: 9%;">Data Source</th>
+                        <th style="width: 7%;">Command</th>
+                        <th style="width: 6%; text-align: center;">Retrieved</th>
+                        <th style="width: 7%; text-align: center;">Used</th>
+                        <th style="width: 13%; text-align: center;">Unused (Prunable)</th>
+                        <th style="width: 8%; text-align: center;">Visual Refs</th>
+                        <th style="width: 7%; text-align: center;">Issues</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ds in dataset_inventory %}
+                    <tr>
+                        <td><strong style="word-break: break-all;">{{ ds.name | e }}</strong></td>
+                        <td style="text-align: center;"><span class="badge badge-low">{{ ds.query_type or 'SQL' }}</span></td>
+                        <td style="text-align: center;">
+                            {% if ds.is_orphan or ds.dependency_type == 'Orphan Candidate' %}
+                            <span class="badge badge-high" style="font-size: 9.5px; white-space: normal; line-height: 1.2;">Orphan Candidate</span>
+                            {% elif ds.dependency_type == 'Parameter Lookup' %}
+                            <span class="badge badge-info" style="font-size: 9.5px; white-space: normal; line-height: 1.2;">Parameter Lookup</span>
+                            {% elif ds.dependency_type == 'Expression Dependency' %}
+                            <span class="badge badge-info" style="font-size: 9.5px; white-space: normal; line-height: 1.2;">Expression Dependency</span>
+                            {% else %}
+                            <span class="badge badge-low" style="font-size: 9.5px; white-space: normal; line-height: 1.2;">Visual Bound</span>
+                            {% endif %}
+                        </td>
+                        <td style="word-break: break-all;">{{ ds.data_source_name | e }}</td>
+                        <td>{{ ds.command_type | e }}</td>
+                        <td style="text-align: center;">{{ ds.fields_retrieved_count }}</td>
+                        <td style="text-align: center;"><span style="color: #047857; font-weight: 600;">{{ ds.fields_referenced_count }}</span></td>
+                        <td style="text-align: center;">
+                            {% if ds.unused_fields_count > 0 %}
+                            <span style="color: var(--sev-high-text); font-weight: 700;">{{ ds.unused_fields_count }} cols</span>
+                            {% else %}
+                            <span style="color: var(--gray-500);">0</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">{{ ds.visual_references_count }} items</td>
+                        <td style="text-align: center;">
+                            {% if ds.detected_issues_count > 0 %}
+                            <span class="badge badge-high">{{ ds.detected_issues_count }}</span>
+                            {% else %}
+                            <span class="badge badge-low">0</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Safe to Prune Details -->
+        {% for ds in dataset_inventory %}
+        {% if ds.unused_fields %}
+        <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px;">
+            <strong>Dataset '{{ ds.name }}' Prunable Columns:</strong>
+            <span style="color: var(--gray-600);">{{ ds.unused_fields | join(', ') | e }}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- 4. Parameter Analysis -->
+    <div class="report-section" id="section-parameters">
+        <div class="section-header-row">
+            <div class="section-title-group">
+                <span class="section-num-pill">{% if total_sql_queries > 0 and dataset_optimizations %}04{% else %}03{% endif %}</span>
+                <h2 class="section-title">Parameter Analysis</h2>
+            </div>
+            <span class="pill-classification">{{ parameter_inventory | length }} Parameters Audited</span>
+        </div>
+        <p class="section-desc">
+            Audits whether user parameter selections are pushed directly into the query source or applied via in-memory filtering.
+        </p>
+
+        {% if parameter_inventory %}
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 13%;">Parameter Name</th>
+                        <th style="width: 8%;">Data Type</th>
+                        <th style="width: 6%; text-align: center;">Multi-Value</th>
+                        <th style="width: 9%;">Default</th>
+                        <th style="width: 15%;">Available Values Dataset</th>
+                        <th style="width: 15%;">Dataset / Query Mapping</th>
+                        <th style="width: 16%;">Usage / Pushdown Status</th>
+                        <th style="width: 18%; text-align: center;">Validation Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prm in parameter_inventory %}
+                    <tr>
+                        <td><strong style="word-break: break-all;">@{{ prm.name | e }}</strong></td>
+                        <td>{{ prm.data_type | e }}</td>
+                        <td style="text-align: center;">{{ prm.multi_value }}</td>
+                        <td style="word-break: break-all;">{{ prm.default_value | e }}</td>
+                        <td style="word-break: break-all;">{{ prm.available_values_dataset | e }}</td>
+                        <td style="word-break: break-all;">{{ prm.dataset_parameter_mapping | e }}</td>
+                        <td>
+                            {% if prm.is_pushed_to_sql %}
+                            <span style="color: #047857; font-weight: 600;">✓ Active / Pushed</span>
+                            {% elif 'defect' in (prm.validation_status | lower) %}
+                            <span style="color: var(--sev-critical-text); font-weight: 700;">✗ Inactive / Functional Issue</span>
+                            {% else %}
+                            <span style="color: var(--sev-critical-text); font-weight: 700;">✗ Inactive / Unpushed</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="badge {% if prm.is_pushed_to_sql %}badge-low{% elif 'defect' in (prm.validation_status | lower) %}badge-critical{% else %}badge-medium{% endif %}" style="font-size: 9.5px; white-space: normal; line-height: 1.2; display: inline-block;">
+                                {{ prm.validation_status | e }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: var(--gray-600); font-style: italic;">No report parameters defined in this RDL specification.</p>
+        {% endif %}
+    </div>
+
+    <!-- 5. Optimization Tracker (Interactive with LocalStorage) -->
+    <div class="report-section" id="section-action-plan">
+        <div class="section-header-row">
+            <div class="section-title-group">
+                <span class="section-num-pill">{% if total_sql_queries > 0 and dataset_optimizations %}05{% else %}04{% endif %}</span>
+                <h2 class="section-title">Optimization Tracker</h2>
+            </div>
+            <span class="badge badge-info" id="plan-saved-indicator">● LocalStorage Sync Active</span>
+        </div>
+        <p class="section-desc">
+            Prioritized engineering action tracker. You can edit <strong>Assigned Owner</strong> and <strong>Status</strong> directly in this table; all updates are automatically saved locally in your browser.
+        </p>
+
+        <div class="data-table-container">
+            <table class="data-table" id="action-plan-table">
+                <thead>
+                    <tr>
+                        <th style="width: 6%; text-align: center;">Priority</th>
+                        <th style="width: 8%;">Finding ID</th>
+                        <th style="width: 9%;">Target Object</th>
+                        <th style="width: 22%;">Recommended Action</th>
+                        <th style="width: 16%;">Expected Outcome</th>
+                        <th style="width: 9%; text-align: center;">Validation</th>
+                        <th style="width: 10%;">Owner</th>
+                        <th style="width: 9%; text-align: center;">Status</th>
+                        <th style="width: 11%;">Validation Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in action_plan %}
+                    <tr data-finding-id="{{ item.finding_id }}">
+                        <td style="text-align: center;">
+                            <span class="badge {% if item.priority == 'P1' %}badge-critical{% elif item.priority == 'P2' %}badge-high{% elif item.priority == 'P3' %}badge-medium{% else %}badge-low{% endif %}">
+                                {{ item.priority }}
+                            </span>
+                        </td>
+                        <td style="font-family: ui-monospace, monospace; font-weight: 600; font-size: 11px; word-break: break-all;">{{ item.finding_id }}</td>
+                        <td><strong style="word-break: break-all;">{{ item.target }}</strong></td>
+                        <td style="font-size: 11.5px;">{{ item.action | e }}</td>
+                        <td style="color: #065F46; font-weight: 500; font-size: 11.5px;">{{ item.expected_outcome | e }}</td>
+                        <td style="text-align: center;">
+                            {% set vstat = item.validation_status | default('Validated against RDL metadata') %}
+                            <span class="badge {% if 'manual' in (vstat | lower) %}badge-medium{% elif 'partially' in (vstat | lower) %}badge-medium{% elif 'invalid' in (vstat | lower) %}badge-critical{% else %}badge-low{% endif %}" style="font-size: 9.5px; white-space: normal; line-height: 1.2; display: inline-block;">
+                                {{ vstat | e }}
+                            </span>
+                        </td>
+                        <td>
+                            <input type="text" class="plan-input-owner" data-key="owner_{{ item.finding_id }}" placeholder="Assign owner..." value="{{ item.owner | default('') }}">
+                        </td>
+                        <td style="text-align: center;">
+                            <select class="plan-select-status status-not-started" data-key="status_{{ item.finding_id }}" onchange="updateSelectColor(this)">
+                                <option value="Not Started" selected>Not Started</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Validated">Validated</option>
+                                <option value="Deferred">Deferred</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="plan-input-notes" data-key="notes_{{ item.finding_id }}" placeholder="Validation details..." value="">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="plan-persistence-bar">
+            <span>💾 Changes made in this table are stored locally in your browser under Report ID <code>{{ report_id }}</code>.</span>
+            <button class="btn-reset-plan" onclick="resetActionPlan()">Reset Plan to Defaults</button>
+        </div>
+    </div>
+
+    <!-- Report Footer -->
+    <div style="text-align: center; color: var(--gray-500); font-size: 11.5px; margin-top: 30px;">
+        <div>Xebia Enterprise Paginated Report Performance Analyzer · Confidential &amp; Proprietary</div>
+        <div style="margin-top: 3px;">Generated for {{ report_name | e }} on {{ generation_time | e }} · Report ID: {{ report_id | e }}</div>
+    </div>
+
+</div>
+
+<!-- Copy notification toast -->
+<div id="toast">Copied to clipboard!</div>
+
+<script>
+    // Copy SQL to clipboard with visual toast
+    function copyText(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        const text = el.innerText || el.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            showToast("SQL query copied to clipboard!");
+        }).catch(err => {
+            showToast("Failed to copy: " + err);
+        });
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.innerText = msg;
+        t.style.display = "block";
+        setTimeout(() => {
+            t.style.display = "none";
+        }, 2200);
+    }
+
+    // Action Plan LocalStorage Persistence Engine
+    const REPORT_ID = "{{ report_id }}";
+    const STORAGE_KEY = "xebia_action_plan_" + REPORT_ID;
+
+    function updateSelectColor(select) {
+        select.className = "plan-select-status";
+        const val = select.value.toLowerCase().replace(/\s+/g, '-');
+        select.classList.add("status-" + val);
+        saveActionPlan();
+    }
+
+    function saveActionPlan() {
+        const data = {};
+        document.querySelectorAll("#action-plan-table input, #action-plan-table select").forEach(el => {
+            const key = el.getAttribute("data-key");
+            if (key) {
+                data[key] = el.value;
+            }
+        });
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            const ind = document.getElementById("plan-saved-indicator");
+            if (ind) {
+                ind.innerText = "● Saved to LocalStorage (" + new Date().toLocaleTimeString() + ")";
+            }
+        } catch (e) {
+            console.warn("LocalStorage save failed:", e);
+        }
+    }
+
+    function loadActionPlan() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            document.querySelectorAll("#action-plan-table input, #action-plan-table select").forEach(el => {
+                const key = el.getAttribute("data-key");
+                if (key && data[key] !== undefined) {
+                    el.value = data[key];
+                    if (el.tagName === "SELECT") {
+                        updateSelectColor(el);
+                    }
+                }
+            });
+            const ind = document.getElementById("plan-saved-indicator");
+            if (ind) {
+                ind.innerText = "● Restored from LocalStorage";
+            }
+        } catch (e) {
+            console.warn("LocalStorage load failed:", e);
+        }
+    }
+
+    function resetActionPlan() {
+        if (confirm("Reset all status and owner inputs for this report?")) {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+    }
+
+    // Attach listeners on inputs for auto-saving
+    document.addEventListener("DOMContentLoaded", () => {
+        loadActionPlan();
+        document.querySelectorAll("#action-plan-table input").forEach(input => {
+            input.addEventListener("input", saveActionPlan);
+        });
+        document.querySelectorAll("#action-plan-table select").forEach(select => {
+            select.addEventListener("change", () => updateSelectColor(select));
+            updateSelectColor(select);
+        });
+    });
+</script>
+
+</body>
+</html>

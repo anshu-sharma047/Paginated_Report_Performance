@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition">
+  <ReportParameters>
+    <ReportParameter Name="FiscalYear">
+      <DataType>Integer</DataType>
+      <Prompt>Select Fiscal Year</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="RegionName">
+      <DataType>String</DataType>
+      <Prompt>Select Sales Region</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <DataSources>
+    <DataSource Name="GlobalSalesDW">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=sql-prod;Initial Catalog=GlobalSales</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="SalesData">
+      <Query>
+        <DataSourceName>GlobalSalesDW</DataSourceName>
+        <!-- Notice: No WHERE clause or parameter pushdown; retrieves all years and regions -->
+        <CommandText>SELECT OrderID, CustomerName, Region, FiscalYear, Amount, Cost, CreatedDate FROM Orders;</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="OrderID"><DataField>OrderID</DataField></Field>
+        <Field Name="CustomerName"><DataField>CustomerName</DataField></Field>
+        <Field Name="Region"><DataField>Region</DataField></Field>
+        <Field Name="FiscalYear"><DataField>FiscalYear</DataField></Field>
+        <Field Name="Amount"><DataField>Amount</DataField></Field>
+        <Field Name="Cost"><DataField>Cost</DataField></Field>
+        <Field Name="CreatedDate"><DataField>CreatedDate</DataField></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Code>
+    Function CalculateCommission(ByVal amount As Decimal) As Decimal
+      Dim comm As Decimal = 0.0
+      For i As Integer = 1 To 100
+        comm = comm + (amount * 0.0001)
+      Next
+      Return comm
+    End Function
+  </Code>
+  <Body>
+    <ReportItems>
+      <Tablix Name="SalesTablix">
+        <DataSetName>SalesData</DataSetName>
+        <Filters>
+          <!-- Client-side / in-memory Tablix filter instead of SQL pushdown -->
+          <Filter>
+            <FilterExpression>=Fields!Region.Value</FilterExpression>
+            <Operator>Equal</Operator>
+            <FilterValues>
+              <FilterValue>=Parameters!RegionName.Value</FilterValue>
+            </FilterValues>
+          </Filter>
+        </Filters>
+        <TablixBody>
+          <TablixColumns>
+            <TablixColumn><Width>1.5in</Width></TablixColumn>
+            <TablixColumn><Width>1.5in</Width></TablixColumn>
+            <TablixColumn><Width>2in</Width></TablixColumn>
+            <TablixColumn><Width>2in</Width></TablixColumn>
+          </TablixColumns>
+          <TablixRows>
+            <TablixRow>
+              <Height>0.3in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtOrder">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!OrderID.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtCustomer">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!CustomerName.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtPriorityTier">
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <!-- Deeply nested 5-level IIF expression -->
+                              <Value>=IIF(Fields!Amount.Value &gt; 100000, "Platinum", IIF(Fields!Amount.Value &gt; 50000, "Gold", IIF(Fields!Amount.Value &gt; 20000, "Silver", IIF(Fields!Amount.Value &gt; 5000, "Bronze", "Standard"))))</Value>
+                            </TextRun>
+                          </TextRuns>
+                        </Paragraph>
+                      </Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtFormattedTimestamp">
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <!-- Repeated in-memory type conversions -->
+                              <Value>=CDate(CStr(Fields!CreatedDate.Value)) &amp; " - " &amp; CDbl(Fields!Amount.Value)</Value>
+                            </TextRun>
+                          </TextRuns>
+                        </Paragraph>
+                      </Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+          </TablixRows>
+        </TablixBody>
+        <TablixRowHierarchy>
+          <TablixMembers>
+            <TablixMember><Group Name="DetailsGroup" /></TablixMember>
+          </TablixMembers>
+        </TablixRowHierarchy>
+      </Tablix>
+    </ReportItems>
+  </Body>
+</Report>

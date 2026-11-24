@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <rd:ReportID>88888888-8888-8888-8888-888888888888</rd:ReportID>
+  <DataSources>
+    <DataSource Name="EnterpriseDW">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=sql-server-prod.corp.local;Initial Catalog=EnterpriseDW</ConnectString>
+        <IntegratedSecurity>true</IntegratedSecurity>
+      </ConnectionProperties>
+      <rd:DataSourceID>99999999-9999-9999-9999-999999999999</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <ReportParameters>
+    <ReportParameter Name="OrderYear">
+      <DataType>Integer</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>2025</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Order Year</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Region">
+      <DataType>Text</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>North America</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Sales Region</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>RegionParamDataset</DataSetName>
+          <ValueField>Region</ValueField>
+          <LabelField>Region</LabelField>
+        </DataSetReference>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="Department">
+      <DataType>Text</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>All</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Business Department</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <DataSets>
+    <!-- Dataset 1: Active Visual Dataset with SELECT *, Non-SARGable date predicate, and 6 unused columns -->
+    <DataSet Name="OrdersMainDataset">
+      <Query>
+        <DataSourceName>EnterpriseDW</DataSourceName>
+        <CommandText>SELECT * FROM dbo.FactOrders WHERE YEAR(OrderDate) = @OrderYear</CommandText>
+        <QueryParameters>
+          <QueryParameter Name="@OrderYear">
+            <Value>=Parameters!OrderYear.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+      </Query>
+      <Fields>
+        <Field Name="OrderID">
+          <DataField>OrderID</DataField>
+        </Field>
+        <Field Name="OrderDate">
+          <DataField>OrderDate</DataField>
+        </Field>
+        <Field Name="CustomerID">
+          <DataField>CustomerID</DataField>
+        </Field>
+        <Field Name="ProductID">
+          <DataField>ProductID</DataField>
+        </Field>
+        <Field Name="SalesAmount">
+          <DataField>SalesAmount</DataField>
+        </Field>
+        <Field Name="CreatedBy">
+          <DataField>CreatedBy</DataField>
+        </Field>
+        <Field Name="ModifiedBy">
+          <DataField>ModifiedBy</DataField>
+        </Field>
+        <Field Name="ShippingMethod">
+          <DataField>ShippingMethod</DataField>
+        </Field>
+        <Field Name="TaxRate">
+          <DataField>TaxRate</DataField>
+        </Field>
+        <Field Name="InternalComments">
+          <DataField>InternalComments</DataField>
+        </Field>
+        <Field Name="DiscountCode">
+          <DataField>DiscountCode</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+
+    <!-- Dataset 2: Active Dataset with In-Memory Dataset Filter (Missing SQL WHERE pushdown) -->
+    <DataSet Name="CustomerLookupDataset">
+      <Query>
+        <DataSourceName>EnterpriseDW</DataSourceName>
+        <CommandText>SELECT CustomerID, CustomerName, Region, CustomerSegment FROM dbo.DimCustomer</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="CustomerID">
+          <DataField>CustomerID</DataField>
+        </Field>
+        <Field Name="CustomerName">
+          <DataField>CustomerName</DataField>
+        </Field>
+        <Field Name="Region">
+          <DataField>Region</DataField>
+        </Field>
+        <Field Name="CustomerSegment">
+          <DataField>CustomerSegment</DataField>
+        </Field>
+      </Fields>
+      <Filters>
+        <Filter>
+          <FilterExpression>=Fields!Region.Value</FilterExpression>
+          <Operator>Equal</Operator>
+          <FilterValues>
+            <FilterValue>=Parameters!Region.Value</FilterValue>
+          </FilterValues>
+        </Filter>
+      </Filters>
+    </DataSet>
+
+    <!-- Dataset 3: Parameter Available Values Lookup (Valid parameter dataset - NOT an orphan) -->
+    <DataSet Name="RegionParamDataset">
+      <Query>
+        <DataSourceName>EnterpriseDW</DataSourceName>
+        <CommandText>SELECT DISTINCT Region FROM dbo.DimCustomer ORDER BY Region</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="Region">
+          <DataField>Region</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+
+    <!-- Dataset 4: Completely Unused / Orphan Dataset (Should be recommended for removal) -->
+    <DataSet Name="UnusedInventoryDataset">
+      <Query>
+        <DataSourceName>EnterpriseDW</DataSourceName>
+        <CommandText>SELECT * FROM dbo.FactWarehouseInventory</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="InventoryID">
+          <DataField>InventoryID</DataField>
+        </Field>
+        <Field Name="WarehouseCode">
+          <DataField>WarehouseCode</DataField>
+        </Field>
+        <Field Name="StockLevel">
+          <DataField>StockLevel</DataField>
+        </Field>
+        <Field Name="ReorderThreshold">
+          <DataField>ReorderThreshold</DataField>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+
+  <Body>
+    <ReportItems>
+      <!-- Title -->
+      <Textbox Name="ReportHeaderTitle">
+        <CanGrow>true</CanGrow>
+        <KeepTogether>true</KeepTogether>
+        <Paragraphs>
+          <Paragraph>
+            <TextRuns>
+              <TextRun>
+                <Value>Executive Sales &amp; Customer Order Summary</Value>
+                <Style>
+                  <FontSize>16pt</FontSize>
+                  <FontWeight>Bold</FontWeight>
+                  <Color>#1E293B</Color>
+                </Style>
+              </TextRun>
+            </TextRuns>
+          </Paragraph>
+        </Paragraphs>
+        <Top>0.2in</Top>
+        <Left>0.2in</Left>
+        <Height>0.4in</Height>
+        <Width>8in</Width>
+      </Textbox>
+
+      <!-- Table 1: Bound to OrdersMainDataset (consumes OrderID, OrderDate, CustomerID, ProductID, SalesAmount) -->
+      <Tablix Name="OrdersTablix">
+        <TablixBody>
+          <TablixColumns>
+            <TablixColumn><Width>1.2in</Width></TablixColumn>
+            <TablixColumn><Width>1.2in</Width></TablixColumn>
+            <TablixColumn><Width>1.2in</Width></TablixColumn>
+            <TablixColumn><Width>1.2in</Width></TablixColumn>
+            <TablixColumn><Width>1.4in</Width></TablixColumn>
+          </TablixColumns>
+          <TablixRows>
+            <!-- Header Row -->
+            <TablixRow>
+              <Height>0.3in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrOrderID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Order ID</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrOrderDate">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Order Date</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrCustomerID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Customer ID</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrProductID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Product ID</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrSalesAmount">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Sales Amount</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+            <!-- Detail Row -->
+            <TablixRow>
+              <Height>0.25in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValOrderID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!OrderID.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValOrderDate">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!OrderDate.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValCustomerID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!CustomerID.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValProductID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!ProductID.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValSalesAmount">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!SalesAmount.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+          </TablixRows>
+        </TablixBody>
+        <TablixColumnHierarchy>
+          <TablixMembers>
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+          </TablixMembers>
+        </TablixColumnHierarchy>
+        <TablixRowHierarchy>
+          <TablixMembers>
+            <TablixMember />
+            <TablixMember>
+              <Group Name="OrdersGroup" />
+            </TablixMember>
+          </TablixMembers>
+        </TablixRowHierarchy>
+        <DataSetName>OrdersMainDataset</DataSetName>
+        <Top>0.8in</Top>
+        <Left>0.2in</Left>
+        <Height>0.55in</Height>
+        <Width>6.2in</Width>
+      </Tablix>
+
+      <!-- Table 2: Bound to CustomerLookupDataset (consumes CustomerID, CustomerName, Region, CustomerSegment) -->
+      <Tablix Name="CustomerTablix">
+        <TablixBody>
+          <TablixColumns>
+            <TablixColumn><Width>1.2in</Width></TablixColumn>
+            <TablixColumn><Width>1.8in</Width></TablixColumn>
+            <TablixColumn><Width>1.2in</Width></TablixColumn>
+            <TablixColumn><Width>1.4in</Width></TablixColumn>
+          </TablixColumns>
+          <TablixRows>
+            <TablixRow>
+              <Height>0.3in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrCustID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Customer ID</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrCustName">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Customer Name</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrCustRegion">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Region</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="HdrCustSegment">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>Segment</Value><Style><FontWeight>Bold</FontWeight></Style></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+            <TablixRow>
+              <Height>0.25in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValCustID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!CustomerID.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValCustName">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!CustomerName.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValCustRegion">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!Region.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ValCustSegment">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!CustomerSegment.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+          </TablixRows>
+        </TablixBody>
+        <TablixColumnHierarchy>
+          <TablixMembers>
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+          </TablixMembers>
+        </TablixColumnHierarchy>
+        <TablixRowHierarchy>
+          <TablixMembers>
+            <TablixMember />
+            <TablixMember>
+              <Group Name="CustomerGroup" />
+            </TablixMember>
+          </TablixMembers>
+        </TablixRowHierarchy>
+        <DataSetName>CustomerLookupDataset</DataSetName>
+        <Top>1.6in</Top>
+        <Left>0.2in</Left>
+        <Height>0.55in</Height>
+        <Width>5.6in</Width>
+      </Tablix>
+    </ReportItems>
+    <Height>3.5in</Height>
+  </Body>
+  <Width>8.5in</Width>
+  <Page>
+    <PageHeight>11in</PageHeight>
+    <PageWidth>8.5in</PageWidth>
+    <LeftMargin>0.5in</LeftMargin>
+    <RightMargin>0.5in</RightMargin>
+    <TopMargin>0.5in</TopMargin>
+    <BottomMargin>0.5in</BottomMargin>
+  </Page>
+</Report>

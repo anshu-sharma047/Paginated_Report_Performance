@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition">
+  <DataSources>
+    <DataSource Name="ERPDataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=erp-db;Initial Catalog=ERP</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="ActiveOrders">
+      <Query>
+        <DataSourceName>ERPDataSource</DataSourceName>
+        <CommandText>SELECT OrderID, OrderNumber, CustomerName, OrderTotal FROM Orders WHERE Status = 'Active';</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="OrderID"><DataField>OrderID</DataField></Field>
+        <Field Name="OrderNumber"><DataField>OrderNumber</DataField></Field>
+        <Field Name="CustomerName"><DataField>CustomerName</DataField></Field>
+        <Field Name="OrderTotal"><DataField>OrderTotal</DataField></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="OrphanCustomerHistory">
+      <Query>
+        <DataSourceName>ERPDataSource</DataSourceName>
+        <CommandText>SELECT CustomerID, AccountBalance, CreditScore FROM CustomerCreditAudit;</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="CustomerID"><DataField>CustomerID</DataField></Field>
+        <Field Name="AccountBalance"><DataField>AccountBalance</DataField></Field>
+        <Field Name="CreditScore"><DataField>CreditScore</DataField></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="OrphanSuppliers">
+      <Query>
+        <DataSourceName>ERPDataSource</DataSourceName>
+        <CommandText>SELECT SupplierID, SupplierName, Rating FROM VendorDirectory;</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="SupplierID"><DataField>SupplierID</DataField></Field>
+        <Field Name="SupplierName"><DataField>SupplierName</DataField></Field>
+        <Field Name="Rating"><DataField>Rating</DataField></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="LookupStatus">
+      <Query><DataSourceName>ERPDataSource</DataSourceName><CommandText>SELECT StatusID, StatusDesc FROM DimStatus;</CommandText></Query>
+      <Fields><Field Name="StatusID"><DataField>StatusID</DataField></Field></Fields>
+    </DataSet>
+    <DataSet Name="LookupRegions">
+      <Query><DataSourceName>ERPDataSource</DataSourceName><CommandText>SELECT RegionID, RegionName FROM DimRegion;</CommandText></Query>
+      <Fields><Field Name="RegionID"><DataField>RegionID</DataField></Field></Fields>
+    </DataSet>
+    <DataSet Name="LookupTiers">
+      <Query><DataSourceName>ERPDataSource</DataSourceName><CommandText>SELECT TierCode, TierName FROM DimTier;</CommandText></Query>
+      <Fields><Field Name="TierCode"><DataField>TierCode</DataField></Field></Fields>
+    </DataSet>
+    <DataSet Name="LookupShipping">
+      <Query><DataSourceName>ERPDataSource</DataSourceName><CommandText>SELECT MethodID, MethodName FROM DimShipping;</CommandText></Query>
+      <Fields><Field Name="MethodID"><DataField>MethodID</DataField></Field></Fields>
+    </DataSet>
+    <DataSet Name="AuditMetadata">
+      <Query><DataSourceName>ERPDataSource</DataSourceName><CommandText>SELECT RunTime, MachineName FROM SysAudit;</CommandText></Query>
+      <Fields><Field Name="RunTime"><DataField>RunTime</DataField></Field></Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems>
+      <Tablix Name="OrdersMasterTablix">
+        <DataSetName>ActiveOrders</DataSetName>
+        <TablixBody>
+          <TablixColumns>
+            <TablixColumn><Width>2in</Width></TablixColumn>
+            <TablixColumn><Width>4in</Width></TablixColumn>
+          </TablixColumns>
+          <TablixRows>
+            <TablixRow>
+              <Height>0.5in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtOrderNum">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!OrderNumber.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <!-- Subreport embedded inside detail row cell: N+1 Execution Hazard -->
+                    <Subreport Name="SubreportOrderItems">
+                      <ReportName>OrderItemDetailsSubreport</ReportName>
+                      <Parameters>
+                        <Parameter Name="OrderID">
+                          <Value>=Fields!OrderID.Value</Value>
+                        </Parameter>
+                      </Parameters>
+                    </Subreport>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+          </TablixRows>
+        </TablixBody>
+        <TablixRowHierarchy>
+          <TablixMembers>
+            <TablixMember>
+              <Group Name="OrderGroup">
+                <GroupExpressions>
+                  <GroupExpression>=Fields!OrderID.Value</GroupExpression>
+                </GroupExpressions>
+              </Group>
+            </TablixMember>
+          </TablixMembers>
+        </TablixRowHierarchy>
+      </Tablix>
+    </ReportItems>
+  </Body>
+</Report>

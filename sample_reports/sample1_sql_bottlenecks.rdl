@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <ReportParameters>
+    <ReportParameter Name="Year">
+      <DataType>Integer</DataType>
+      <Prompt>Select Year</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <DataSources>
+    <DataSource Name="EnterpriseDW">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=sql-prod;Initial Catalog=EnterpriseDW</ConnectString>
+      </ConnectionProperties>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="SalesDataset">
+      <Query>
+        <DataSourceName>EnterpriseDW</DataSourceName>
+        <CommandText>SELECT * FROM Sales WHERE YEAR(SaleDate) = 2026;</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="SaleID"><DataField>SaleID</DataField></Field>
+        <Field Name="CustomerID"><DataField>CustomerID</DataField></Field>
+        <Field Name="SaleDate"><DataField>SaleDate</DataField></Field>
+        <Field Name="Amount"><DataField>Amount</DataField></Field>
+        <Field Name="Discount"><DataField>Discount</DataField></Field>
+        <Field Name="Tax"><DataField>Tax</DataField></Field>
+        <Field Name="ShippingCost"><DataField>ShippingCost</DataField></Field>
+        <Field Name="Notes"><DataField>Notes</DataField></Field>
+        <Field Name="AuditCreatedDate"><DataField>AuditCreatedDate</DataField></Field>
+        <Field Name="AuditCreatedBy"><DataField>AuditCreatedBy</DataField></Field>
+        <Field Name="AuditUpdatedDate"><DataField>AuditUpdatedDate</DataField></Field>
+        <Field Name="AuditUpdatedBy"><DataField>AuditUpdatedBy</DataField></Field>
+        <Field Name="LegacyID"><DataField>LegacyID</DataField></Field>
+        <Field Name="Filler1"><DataField>Filler1</DataField></Field>
+        <Field Name="Filler2"><DataField>Filler2</DataField></Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="TransactionsDataset">
+      <Query>
+        <DataSourceName>EnterpriseDW</DataSourceName>
+        <CommandText>SELECT * FROM Transactions;</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="TransactionID"><DataField>TransactionID</DataField></Field>
+        <Field Name="SaleID"><DataField>SaleID</DataField></Field>
+        <Field Name="TxAmount"><DataField>TxAmount</DataField></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <Body>
+    <ReportItems>
+      <Tablix Name="SalesSummaryTablix">
+        <DataSetName>SalesDataset</DataSetName>
+        <TablixBody>
+          <TablixColumns>
+            <TablixColumn><Width>1in</Width></TablixColumn>
+            <TablixColumn><Width>1in</Width></TablixColumn>
+            <TablixColumn><Width>1in</Width></TablixColumn>
+            <TablixColumn><Width>1in</Width></TablixColumn>
+          </TablixColumns>
+          <TablixRows>
+            <TablixRow>
+              <Height>0.25in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtSaleID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!SaleID.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtCustomerID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!CustomerID.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtSaleDate">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!SaleDate.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtAmount">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!Amount.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+          </TablixRows>
+        </TablixBody>
+        <TablixRowHierarchy>
+          <TablixMembers>
+            <TablixMember><Group Name="Details" /></TablixMember>
+          </TablixMembers>
+        </TablixRowHierarchy>
+      </Tablix>
+      <Tablix Name="TransactionsTablix">
+        <DataSetName>TransactionsDataset</DataSetName>
+        <TablixBody>
+          <TablixColumns>
+            <TablixColumn><Width>1in</Width></TablixColumn>
+          </TablixColumns>
+          <TablixRows>
+            <TablixRow>
+              <Height>0.25in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="TxtTxID">
+                      <Paragraphs><Paragraph><TextRuns><TextRun><Value>=Fields!TransactionID.Value</Value></TextRun></TextRuns></Paragraph></Paragraphs>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+          </TablixRows>
+        </TablixBody>
+        <TablixRowHierarchy>
+          <TablixMembers>
+            <TablixMember><Group Name="TxDetails" /></TablixMember>
+          </TablixMembers>
+        </TablixRowHierarchy>
+      </Tablix>
+    </ReportItems>
+  </Body>
+</Report>
